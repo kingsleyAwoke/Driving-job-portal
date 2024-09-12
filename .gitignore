@@ -1,0 +1,17 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Build output
+build/
+
+# Environment variables
+.env
+
+# MacOS
+.DS_Store
+
+# Optional: npm package lock file
+package-lock.json
