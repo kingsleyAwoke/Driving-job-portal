@@ -1,0 +1,16 @@
+{
+  "name": "project",
+  "version": "1.0.0",
+  "description": "Job posting and Seeking platform",
+  "main": "server.js",
+  "scripts": {
+    "test": "test.js"
+  },
+  "author": "Kingsley Awoke",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "pg": "^8.12.0"
+  }
+}
