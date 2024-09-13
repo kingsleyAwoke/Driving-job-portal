@@ -1,5 +1,9 @@
 * {
-  box-shadow: border-box
+  box-shadow: border-box;
   margin: 0;
   padding: 0;
+}
+
+body {
+  color: darkblue;
 }

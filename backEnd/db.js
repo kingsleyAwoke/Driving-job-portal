@@ -5,7 +5,7 @@ const pool = new Pool({
     host: 'localhost',
     database: 'jobseek_db',
     password: 'post123456',
-    port: 5432, // default PostgreSQL port
+    port: 5432,
 });
 
 module.exports = pool;
