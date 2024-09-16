@@ -1,24 +1,28 @@
+require('dotenv').config();
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-//const bcrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs');
+const jwtSecret = process.env.JWT_SECRET;
 const app = express();
-require('dotenv').config();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Added for form data
+
+console.log('JWT Secret:', process.env.JWT_SECRET);
 
 // DATABASE CONNECTION
 const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_DATABASE,
-    password: process.env.DB_PASSWORD,
+    user: "kingsley",
+    host: "localhost",
+    database: 'jobseek_db',
+    password: process.env.PASSWORD,
     port: process.env.DB_PORT,
 });
 
@@ -26,15 +30,15 @@ const pool = new Pool({
 // Helper function to send OTP
 const sendOtp = async (email, mobile_number, otp) => {
     const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        service: 'yahoo',
         auth: {
-            user: '@gmail.com',
-            pass: '',
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASSWORD,
         },
     });
 
     const message = {
-        from: '@gmail.com',
+        from: 'kingsley_social@yahoo.com',
         to: email,
         subject: 'Your OTP Code',
         text: `Your OTP code is ${otp}`,
@@ -53,9 +57,29 @@ const sendOtp = async (email, mobile_number, otp) => {
 // Signup endpoint
 app.post('/signup', async (req, res) => {
     const { name, email, mobile_number, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('Request Body:', req.body);
+
+    // Validate input
+   // if (!name || !email || //!mobile_number || !password) {
+       // return res.status(400).send({ //error: 'All fields are //required' });
+    //}
+
+    // Check for existing user
+    const existingUser = await pool.query(
+        'SELECT * FROM users WHERE email = $1 OR mobile_number = $2',
+        [email, mobile_number]
+    );
+
+    if (existingUser.rowCount > 0) {
+        return res.status(409).send({ error: 'User already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash("password", 10);
     const otp = crypto.randomInt(100000, 999999).toString();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    console.log('Hashed Password:', hashedPassword);
+    console.log('OTP:', otp);
+    console.log('OTP Expiry:', otpExpiry);
 
     try {
         await pool.query(
@@ -66,6 +90,7 @@ app.post('/signup', async (req, res) => {
         await sendOtp(email, mobile_number, otp);
         res.status(201).send({ message: 'Signup successful. OTP sent.' });
     } catch (error) {
+        console.error('Error during signup:', error);
         res.status(500).send({ error: 'Error during signup' });
     }
 });
@@ -116,7 +141,7 @@ app.post('/login', async (req, res) => {
             return res.status(401).send({ error: 'Invalid credentials' });
         }
 
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: user.id }, jwtSecret, { expiresIn: '1h', algorithm: 'HS256' });
         res.send({ token });
     } catch (error) {
         res.status(500).send({ error: 'Error during login' });
