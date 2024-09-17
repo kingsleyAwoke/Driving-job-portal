@@ -3,7 +3,9 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
+//const nodemailer = require('nodemailer');
+const Mailgun = require('mailgun-js');
+const formData = require('form-data');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwtSecret = process.env.JWT_SECRET;
@@ -15,7 +17,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Added for form data
 
-console.log('JWT Secret:', process.env.JWT_SECRET);
+// MAIL API
+const mailgun = new Mailgun(formData);
+const mg = mailgun({ apiKey: process.env.MAIL_API_KEY, domain: process.env.MAIL_DOMAIN });
 
 // DATABASE CONNECTION
 const pool = new Pool({
@@ -28,28 +32,15 @@ const pool = new Pool({
 
 
 // Helper function to send OTP
-const sendOtp = async (email, mobile_number, otp) => {
-    const transporter = nodemailer.createTransport({
-        service: 'yahoo',
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASSWORD,
-        },
-    });
-
-    const message = {
-        from: 'kingsley_social@yahoo.com',
-        to: email,
+const sendOtp = (email, mobile_number, otp) => {
+    mg.messages.create('sandbox8c46f4ed1b284f2a8e872fd4c449daf2.mailgun.org', {
+        from: "noreply@sandbox8c46f4ed1b284f2a8e872fd4c449daf2.mailgun.org", 
+        to: [email],
         subject: 'Your OTP Code',
-        text: `Your OTP code is ${otp}`,
-    };
-
-    try {
-        await transporter.sendMail(message);
-        console.log('OTP sent');
-    } catch (error) {
-        console.error('Error sending OTP:', error);
-    }
+        text: `Your OTP Code is ${otp}`,
+    })
+    .then(msg => console.log('Email sent:', msg))
+    .catch(err => console.error('Error sending email:', err));
 };
 
 
