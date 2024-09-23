@@ -10,7 +10,7 @@ const Signup = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('/signup', { name, email, mobile_number, password });
+            await axios.post('http://localhost:5000/signup', { name, email, mobile_number, password });
             alert('Signup successful! Check your email for the OTP.');
         } catch (error) {
             alert('Error during signup');

@@ -7,7 +7,7 @@ const App = () => {
     return (
         <div>
             <h1>Welcome to the Job Portal</h1>
-            <Signup />
+            <Login />
         </div>
     );
 };

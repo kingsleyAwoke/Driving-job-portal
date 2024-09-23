@@ -3,47 +3,59 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-//const nodemailer = require('nodemailer');
-const Mailgun = require('mailgun-js');
-const formData = require('form-data');
+const nodemailer = require('nodemailer');
+//const Mailgun = require('mailgun-js');
+//const formData = require('form-data');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwtSecret = process.env.JWT_SECRET;
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Added for form data
 
-// MAIL API
-const mailgun = new Mailgun(formData);
-const mg = mailgun({ apiKey: process.env.MAIL_API_KEY, domain: process.env.MAIL_DOMAIN });
 
 // DATABASE CONNECTION
 const pool = new Pool({
-    user: "kingsley",
-    host: "localhost",
-    database: 'jobseek_db',
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
     password: process.env.PASSWORD,
     port: process.env.DB_PORT,
 });
 
+const transporter = nodemailer.createTransport({
+    host: process.env.MAILGUN_HOST,
+    port: process.env.MAILGUN_PORT,
+    auth: {
+        user: process.env.MAILGUN_USER,
+        pass: process.env.MAILGUN_PASS
+    }
+});
 
 // Helper function to send OTP
 const sendOtp = (email, mobile_number, otp) => {
-    mg.messages.create('sandbox8c46f4ed1b284f2a8e872fd4c449daf2.mailgun.org', {
-        from: "noreply@sandbox8c46f4ed1b284f2a8e872fd4c449daf2.mailgun.org", 
-        to: [email],
+    const message = {
+        from: 'noreply@sandbox8c46f4ed1b284f2a8e872fd4c449daf2.mailgun.org',
+        to: email,
         subject: 'Your OTP Code',
-        text: `Your OTP Code is ${otp}`,
-    })
-    .then(msg => console.log('Email sent:', msg))
-    .catch(err => console.error('Error sending email:', err));
+        text: `Your OTP Code is ${otp}`
+    };
+
+    transporter.sendMail(message, (error, info) => {
+        if (error) {
+            return console.error('Error sending email:', error);
+        }
+        console.log('Email sent:', info.response);
+    });
 };
-
-
 
 // Signup endpoint
 app.post('/signup', async (req, res) => {
@@ -51,9 +63,9 @@ app.post('/signup', async (req, res) => {
     console.log('Request Body:', req.body);
 
     // Validate input
-   // if (!name || !email || //!mobile_number || !password) {
-       // return res.status(400).send({ //error: 'All fields are //required' });
-    //}
+    if (!name || !email || !mobile_number || !password) {
+        return res.status(400).send({ error: 'All fields are required' });
+    }
 
     // Check for existing user
     const existingUser = await pool.query(
@@ -65,12 +77,10 @@ app.post('/signup', async (req, res) => {
         return res.status(409).send({ error: 'User already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash("password", 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     const otp = crypto.randomInt(100000, 999999).toString();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-    console.log('Hashed Password:', hashedPassword);
-    console.log('OTP:', otp);
-    console.log('OTP Expiry:', otpExpiry);
+
 
     try {
         await pool.query(

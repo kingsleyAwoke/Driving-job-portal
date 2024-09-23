@@ -15,3 +15,6 @@ build/
 
 # Optional: npm package lock file
 package-lock.json
+
+# Git
+.git
