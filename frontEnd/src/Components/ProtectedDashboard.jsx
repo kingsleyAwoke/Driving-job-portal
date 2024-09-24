@@ -1,5 +1,4 @@
-// ProtectedDashboard.jsx
-import withAuth from './withAuth'; // Path to your HOC
-import UserDashboard from './UserDashboard'; // Path to your Dashboard component
+import WithAuth from './WithAuth';
+import UserDashboard from './UserDashboard';
 
 export default withAuth(UserDashboard);
