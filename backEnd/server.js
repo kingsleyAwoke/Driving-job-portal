@@ -34,7 +34,7 @@ app.use(limiter);
 
 // DATABASE CONNECTION
 const pool = new Pool({
-    user: process.env.DB_USER,
+    user: 'kingsley',
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
     password: process.env.PASSWORD,
@@ -72,7 +72,7 @@ const sendOtp = (email, mobile_number, otp) => {
 const signupSchema = Joi.object({
     name: Joi.string().min(3).max(30).required(),
     email: Joi.string().email().required(),
-    mobile_number: Joi.string().pattern(/^[0-9]+$/).length(10).required(),
+    mobile_number: Joi.string().pattern(/^[0-9]+$/).length(11).required(),
     password: Joi.string().min(6).required(),
 });
 
