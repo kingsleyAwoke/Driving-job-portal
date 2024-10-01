@@ -206,5 +206,39 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// Function to send an email
+const sendEmail = (to, subject, text) => {
+    const mailOptions = {
+        from: 'noreply@sandbox8c46f4ed1b284f2a8e872fd4c449daf2.mailgun.org',
+        to,
+        subject,
+        text,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            return console.error('Error sending email:', error);
+        }
+        console.log('Email sent:', info.response);
+    });
+};
+
+app.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    // Find user by email
+    const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (user.rowCount === 0) return res.status(404).send({ message: 'User not found' });
+
+    // Generate a reset token (you can use JWT or a random token)
+    const resetToken = jwt.sign({ id: user.rows[0].id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    // Send email with reset link (use Nodemailer)
+    const resetLink = `http://localhost:5173/reset-password?token=${resetToken}`;
+    // Send the email with the reset link
+    sendEmail(email, 'Password Reset', `Click here to reset your password: ${resetLink}`);
+
+    res.send({ message: 'Password reset link sent to your email.' });
+});
+
 // Start server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
