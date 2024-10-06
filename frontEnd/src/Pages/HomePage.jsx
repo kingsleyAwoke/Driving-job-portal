@@ -8,7 +8,7 @@ const HomePage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://localhost:5000/homePage'); // Adjust the URL as necessary
+                const response = await fetch('http://localhost:5000/HomePage');
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
@@ -34,8 +34,7 @@ const HomePage = () => {
 
     return (
         <div>
-            <h1>{data.title}</h1>
-            <p>{data.description}</p>
+            <h1>{message}</h1>
         </div>
     );
 };

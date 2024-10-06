@@ -49,15 +49,8 @@ const syncDatabase = async () => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const homePage = {
-  title: "Home Page",
-  description: "This is the home page"
-};
-
 // Home page endpoint
-app.get('/homePage', (req, res) => {
-  res.json(homePage)
-});
+app.use("/HomePage", require('./Routes/HomePage'));
 
 // Rate limiter middleware
 const limiter = rateLimit({
