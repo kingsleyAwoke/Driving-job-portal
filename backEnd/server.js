@@ -6,7 +6,7 @@ const sequelize = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
@@ -14,10 +14,6 @@ app.use(cors({
     methods: ['GET', 'POST'],
     credentials: true
 }));
-
-// Middleware for JSON parsing
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // Rate limiter middleware
 const limiter = rateLimit({
@@ -27,8 +23,15 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+// Middleware for JSON parsing
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
 // Use user routes
-app.use('/signup', userRoutes);
+app.use('/', userRoutes);
+
+
 
 // Start syncing database and server
 const startServer = async () => {

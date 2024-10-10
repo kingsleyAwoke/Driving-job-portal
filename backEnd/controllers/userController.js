@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const validator = require('validator');
+const { sendOtp, sendEmail } = require('../utils/mailer')
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
