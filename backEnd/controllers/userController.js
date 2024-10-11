@@ -1,10 +1,13 @@
+require('dotenv').config();
 const Joi = require('joi');
 const validator = require('validator');
-const { sendOtp, sendEmail } = require('../utils/mailer')
+const { Op } = require('sequelize');
+const { sendOtp, sendEmail } = require('../utils/mailer');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const Users = require('../models/Users');
+const jwtSecret = process.env.JWT_SECRET;
 
 // Validation schemas
 const signupSchema = Joi.object({
@@ -52,7 +55,7 @@ exports.signup = async (req, res) => {
         });
 
         // Send OTP
-        await sendOtp(email, mobile_number, otp);
+        await sendOtp(email, otp);
         res.status(201).send({ message: 'Signup successful. OTP sent.' });
     } catch (error) {
         console.error('Error during signup:', error);
@@ -63,16 +66,16 @@ exports.signup = async (req, res) => {
 // OTP validation controller function
 exports.validateOtp = async (req, res) => {
     try {
-        const { email, mobile_number, otp } = req.body;
+        const { email, otp } = req.body;
 
         // Validate OTP logic
-        const user = await Users.findOne({ where: { email, mobile_number } });
+        const user = await Users.findOne({ where: { email, } });
         if (!user || user.otp !== otp || user.otp_expire < new Date()) {
             return res.status(400).send({ error: 'Invalid or expired OTP' });
         }
 
         // If valid, clear OTP and expiry
-        await Users.update({ otp: null, otp_expire: null }, { where: { email, mobile_number } });
+        await Users.update({ otp: null, otp_expire: null }, { where: { email, } });
         res.send({ message: 'OTP validated successfully' });
     } catch (error) {
         console.error('Error during OTP validation:', error);

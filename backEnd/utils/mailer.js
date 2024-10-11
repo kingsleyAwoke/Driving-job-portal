@@ -1,46 +1,57 @@
-const nodemailer = require('nodemailer');
+require('dotenv').config();
+const axios = require('axios');
 
-const transporter = nodemailer.createTransport({
-    host: process.env.MAILGUN_HOST,
-    port: process.env.MAILGUN_PORT,
-    auth: {
-        user: process.env.MAILGUN_USER,
-        pass: process.env.MAILGUN_PASS
-    }
-});
+const mailgunDomain = process.env.MAILGUN_DOMAIN;
+const mailgunAPIKey =process.env.MAILGUN_API_KEY;
 
 // Helper function to send OTP
-const sendOtp = (email, mobile_number, otp) => {
+const sendOtp = async (email, otp) => {
     const message = {
-        from: 'noreply@sandbox8c46f4ed1b284f2a8e872fd4c449daf2.mailgun.org',
+        from: `noreply@${mailgunDomain}`,
         to: email,
         subject: 'Your OTP Code',
-        text: `Your OTP Code is ${otp}`
+        text: `Your OTP Code is ${otp}`,
     };
 
-    transporter.sendMail(message, (error, info) => {
-        if (error) {
-            return console.error('Error sending email:', error);
-        }
-        console.log('Email sent:', info.response);
-    });
+    try {
+        const response = await axios.post(`https://api.mailgun.net/v3/${mailgunDomain}/messages`, new URLSearchParams(message), {
+            auth: {
+                username: 'api',
+                password: mailgunAPIKey,
+            },
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        });
+        console.log('Email sent:', response.data);
+    } catch (error) {
+        console.error('Error sending email:', error.response ? error.response.data : error.message);
+    }
 };
 
-// Function to send an email
-const sendEmail = (to, subject, text) => {
+// Function to send a general email
+const sendEmail = async (to, subject, text) => {
     const mailOptions = {
-        from: 'noreply@sandbox8c46f4ed1b284f2a8e872fd4c449daf2.mailgun.org',
+        from: `noreply@${mailgunDomain}`,
         to,
         subject,
         text,
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.error('Error sending email:', error);
-        }
-        console.log('Email sent:', info.response);
-    });
+    try {
+        const response = await axios.post(`https://api.mailgun.net/v3/${mailgunDomain}/messages`, new URLSearchParams(mailOptions), {
+            auth: {
+                username: 'api',
+                password: mailgunAPIKey,
+            },
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        });
+        console.log('Email sent:', response.data);
+    } catch (error) {
+        console.error('Error sending email:', error.response ? error.response.data : error.message);
+    }
 };
 
 module.exports = { sendOtp, sendEmail };
