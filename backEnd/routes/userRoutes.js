@@ -14,4 +14,7 @@ router.route('/login').post(userController.login);
 // Forgot password endpoint
 router.route('/forgot-password').post(userController.forgotPassword);
 
+//Reset password
+router.route('/reset-password').post(userController.resetPassword)
+
 module.exports = router;

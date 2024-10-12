@@ -1,6 +1,7 @@
 require('dotenv').config();
 const Joi = require('joi');
 const validator = require('validator');
+const rateLimit = require('express-rate-limit');
 const { Op } = require('sequelize');
 const { sendOtp, sendEmail } = require('../utils/mailer');
 const jwt = require('jsonwebtoken');
@@ -115,6 +116,13 @@ exports.login = async (req, res) => {
     }
 };
 
+// Rate limiter for excess requests
+const forgotPasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // Limit each IP to 5 requests per windowMs
+    message: { message: 'Too many requests, please try again later.' },
+});
+
 // Forgot password controller function
 exports.forgotPassword = async (req, res) => {
     const { email } = req.body;
@@ -134,5 +142,27 @@ exports.forgotPassword = async (req, res) => {
     } catch (error) {
         console.error('Error during password reset:', error);
         res.status(500).send({ error: 'Error during password reset' });
+    }
+};
+
+exports.resetPassword = async (req, res) => {
+    const { token, newPassword } = req.body;
+
+    try {
+        // Verify the token
+        const decoded = jwt.verify(token, jwtSecret);
+        const userId = decoded.id;
+
+        // Update the user's password
+        await Users.update({ password: newPassword }, { where: { id: userId } });
+
+        // Inform the user via email
+        const user = await Users.findByPk(userId);
+        await sendEmail(user.email, 'Password Reset Confirmation', 'Your password has been reset successfully.');
+
+        res.send({ message: 'Password has been reset successfully.' });
+    } catch (error) {
+        console.error('Error during password reset:', error);
+        res.status(400).send({ error: 'Invalid or expired token.' });
     }
 };

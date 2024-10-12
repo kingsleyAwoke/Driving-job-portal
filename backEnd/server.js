@@ -4,6 +4,7 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const sequelize = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
+const profileRoutes = require('./routes/profileRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -28,8 +29,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-// Use user routes
+// Routes
 app.use('/', userRoutes);
+app.use('/', profileRoutes);
 
 
 
