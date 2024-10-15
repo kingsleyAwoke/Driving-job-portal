@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+
+
 const HomePage = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -8,7 +10,7 @@ const HomePage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://localhost:5000/HomePage');
+                const response = await fetch('http://localhost:5000');
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }

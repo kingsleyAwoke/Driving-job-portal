@@ -22,6 +22,54 @@ Users.init({
         type: DataTypes.STRING(15),   // Set length to 15
         allowNull: false,
     },
+    is_operator: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false, // Initially, the user is not a vehicle operator
+    },
+    age: {
+        type: DataTypes.INTEGER,
+        allowNull: true, // Optional, to be filled later
+    },
+    gender: {
+        type: DataTypes.STRING,
+        allowNull: true, // Optional, to be filled later
+    },
+    marital_status: {
+        type: DataTypes.STRING,
+        allowNull: true, // Optional, to be filled later
+    },
+    school_qualification: {
+        type: DataTypes.STRING,
+        allowNull: true, // Optional, to be filled later
+    },
+    vehicle_operation_experience: {
+        type: DataTypes.STRING,
+        allowNull: true, // Optional, to be filled later
+    },
+    vehicle_type: {
+        type: DataTypes.STRING,
+        allowNull: true, // Optional, to be filled later
+    },
+    availability: {
+        type: DataTypes.STRING,
+        allowNull: true, // Optional, to be filled later
+    },
+    profile_picture: {
+        type: DataTypes.STRING,
+        allowNull: true, // Optional, to be filled later
+    },
+    location: {
+        type: DataTypes.STRING,
+        allowNull: true, // Optional, to be filled later
+    },
+    location: {
+        type: DataTypes.STRING,
+        allowNull: true, // Optional, to be filled later
+    },
+    license_class: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     hashed_password: {
         type: DataTypes.STRING(255),   // Length is fine
         allowNull: false,
@@ -39,8 +87,8 @@ Users.init({
     modelName: 'Users',
     tableName: 'users',
     timestamps: true,
-    createdAt: 'created_at',  // Match database naming
-    updatedAt: 'updated_at',  // Match database naming
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
 });
 
 module.exports = Users;
