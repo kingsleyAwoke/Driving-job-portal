@@ -1,10 +1,14 @@
-import React from 'react'
-import Layout from '../Components/Layout';
+import React, { useEffect } from 'react'
+import VehicleOprlerators from '../Components/VehicleOperators';
+
 
 const HomePage = () => {
+  useEffect(() => {
+  document.title = "Jobseek — Driving job portal";
+}, []);
   return (
     <>
-      <Layout />
+      
     </>
   )
 }

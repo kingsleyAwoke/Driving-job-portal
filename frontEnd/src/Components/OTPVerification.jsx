@@ -1,11 +1,9 @@
+import { useLocation, useNavigate } from 'react-router-dom';
 import React, { useState } from 'react';
-import axios from 'axios';
-import { useLocation, useHistory } from 'react-router-dom';
-
 const OTPVerification = () => {
     const location = useLocation();
-    const history = useHistory();
-    const { email, mobile_number } = location.state || {}; // Get email and mobile number from state
+    const navigate = useNavigate();
+    const { email, mobile_number } = location.state || {};
     const [otp, setOtp] = useState('');
 
     const handleSubmit = async (e) => {
@@ -13,7 +11,7 @@ const OTPVerification = () => {
         try {
             await axios.post('http://localhost:5000/validate-otp', { email, mobile_number, otp });
             alert('OTP validated successfully!');
-            history.push('/dashboard'); // Redirect to the user dashboard
+            navigate('/dashboard'); // Redirect to the user dashboard
         } catch (error) {
             alert('Error validating OTP');
         }
@@ -25,13 +23,13 @@ const OTPVerification = () => {
                 type="email" 
                 placeholder="Email" 
                 value={email} 
-                readOnly // Make the email field read-only
+                readOnly 
             />
             <input 
                 type="text" 
                 placeholder="Mobile Number" 
                 value={mobile_number} 
-                readOnly // Make the mobile number field read-only
+                readOnly 
             />
             <input 
                 type="text" 

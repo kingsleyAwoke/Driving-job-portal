@@ -1,20 +1,27 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
-const ProfileDetails = ({ match }) => {
+const ProfileDetails = () => {
     const [user, setUser] = useState(null);
-    const userId = match.params.id;
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchUserProfile = async () => {
-            const response = await fetch(`/api/profile/${userId}`);
-            if (response.ok) {
-                const userData = await response.json();
-                setUser(userData);
+            try {
+                const response = await axios.get('/profile');
+                setUser(response.data);
+            } catch (error) {
+                console.error('Error fetching user profile:', error);
+                setError('Failed to fetch user profile.');
             }
         };
 
         fetchUserProfile();
-    }, [userId]);
+    }, []);
+
+    if (error) {
+        return <div>Error: {error}</div>;
+    }
 
     if (!user) {
         return <div>Loading...</div>;
@@ -23,14 +30,7 @@ const ProfileDetails = ({ match }) => {
     return (
         <div className="profile-details">
             <h1>{user.name}</h1>
-            <img src={user.profile_picture} alt={`${user.name}'s profile`} style={{ width: '150px', height: '150px', borderRadius: '50%' }} />
             <p>Email: {user.email}</p>
-            <p>Contact: {user.mobile_number}</p>
-            <p>Vehicle Type: {user.vehicle_type}</p>
-            <p>Experience Level: {user.experience_level}</p>
-            <p>Availability: {user.availability}</p>
-            <p>Location: {user.location}</p>
-            <p>Bio: {user.bio}</p>
         </div>
     );
 };

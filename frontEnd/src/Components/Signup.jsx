@@ -1,23 +1,26 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [mobile_number, setMobileNumber] = useState('');
     const [password, setPassword] = useState('');
-    const history = useHistory(); // Hook for navigation
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:5000/signup', { name, email, mobile_number, password });
+            const response = await axios.post('http://localhost:5000/signup', { name, email, mobile_number, password });
             alert('Signup successful! Check your email for the OTP.');
-            // Redirect to the validation page with email and mobile number
-            history.push('/validate-otp', { email, mobile_number });
+            // Only navigate if signup was successful
+            if (response.status === 200) {
+                navigate('/otpverify', { state: { email, mobile_number } });
+            }
         } catch (error) {
-            alert('Error during signup');
+            console.error('Error during signup:', error.response?.data || error.message);
+            alert('Error during signup: ' + (error.response?.data?.message || 'An unexpected error occurred.'));
         }
     };
 
